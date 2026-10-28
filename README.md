@@ -29,7 +29,7 @@ VPS（纯 IPv6，Xray + HY2 同占 443 端口，TCP/UDP 不冲突）
 ## 一键安装（新 VPS 恢复用）
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/<你的用户名>/vps-vpn/main/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/leon0503/vps-vpn/main/install.sh)
 ```
 
 装完脚本会自动运行 `nodes` 输出两条链接。以后随时想看链接，SSH 上去运行 `nodes` 即可。
