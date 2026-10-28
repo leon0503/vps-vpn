@@ -1,0 +1,11 @@
+# Hysteria2 服务端配置（UDP 443，与 Xray TCP 443 不冲突）
+listen: :443
+
+tls:
+  type: external
+  cert: /etc/hysteria/cert.crt
+  key: /etc/hysteria/cert.key
+
+auth:
+  type: password
+  password: __HY2_PASSWORD__

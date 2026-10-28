@@ -1,0 +1,55 @@
+{
+  "inbounds": [
+    {
+      "port": 443,
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "flow": "",
+            "id": "__XRAY_UUID__"
+          }
+        ],
+        "decryption": "none"
+      },
+      "sniffing": {
+        "destOverride": [
+          "http",
+          "tls",
+          "quic"
+        ],
+        "enabled": true
+      },
+      "streamSettings": {
+        "grpcSettings": {
+          "multiMode": true,
+          "serviceName": "gun"
+        },
+        "network": "grpc",
+        "security": "tls",
+        "tlsSettings": {
+          "alpn": [],
+          "certificates": [
+            {
+              "certificateFile": "/usr/local/etc/xray/cert.crt",
+              "keyFile": "/usr/local/etc/xray/cert.key"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "log": {
+    "loglevel": "warning"
+  },
+  "outbounds": [
+    {
+      "protocol": "freedom",
+      "tag": "direct"
+    },
+    {
+      "protocol": "blackhole",
+      "tag": "blocked"
+    }
+  ]
+}

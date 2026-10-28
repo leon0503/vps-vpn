@@ -1,0 +1,44 @@
+#!/bin/bash
+# nodes - 输出本机 VLESS + HY2 节点链接（v2rayNG 可直接导入）
+# 来源：读取 Xray 配置中的 UUID、HY2 配置中的密码、公网 IPv6、/etc/node-name 中的节点名前缀
+# 用法：直接运行 nodes（无参数）
+set -e
+
+NODE_NAME="德国"
+if [ -f /etc/node-name ]; then
+  NODE_NAME="$(cat /etc/node-name | tr -d '[:space:]')"
+fi
+[ -z "$NODE_NAME" ] && NODE_NAME="德国"
+
+# 公网 IPv6（优先本机全局地址，兜底用外网回显）
+IPV6="$(ip -6 addr show scope global 2>/dev/null | grep -oP 'inet6 \K[0-9a-fA-F:]+' | grep -v '^fe80' | head -n1)"
+if [ -z "$IPV6" ]; then
+  IPV6="$(curl -6 -s --max-time 5 https://ifconfig.me 2>/dev/null || curl -6 -s --max-time 5 https://ip.sb 2>/dev/null || true)"
+fi
+if [ -z "$IPV6" ]; then
+  echo "错误：取不到公网 IPv6，请检查网络" >&2
+  exit 1
+fi
+
+# Xray UUID（python3 优先，grep 兜底）
+XRAY_CONF="/usr/local/etc/xray/config.json"
+if [ ! -f "$XRAY_CONF" ]; then echo "错误：找不到 $XRAY_CONF，Xray 未安装？" >&2; exit 1; fi
+UUID="$(python3 -c "import json; print(json.load(open('$XRAY_CONF'))['inbounds'][0]['settings']['clients'][0]['id'])" 2>/dev/null || true)"
+if [ -z "$UUID" ]; then
+  UUID="$(grep -oP '"id":\s*"\K[^"]+' "$XRAY_CONF" | head -n1)"
+fi
+if [ -z "$UUID" ]; then echo "错误：从 $XRAY_CONF 取不到 UUID" >&2; exit 1; fi
+
+# Xray SNI：从服务端证书 CN 读取（与安装时用的 SNI 保持一致），取不到则用默认值
+# 注意：客户端用 allowInsecure=1 跳过验证，SNI 不影响连通，只影响显示
+SNI="$(openssl x509 -noout -subject -in /usr/local/etc/xray/cert.crt 2>/dev/null | grep -oP 'CN\s*=\s*\K[^,/]+' | head -n1 || true)"
+[ -z "$SNI" ] && SNI="eu.riven.dpdns.org"
+
+# HY2 密码
+HY2_CONF="/etc/hysteria/config.yaml"
+if [ ! -f "$HY2_CONF" ]; then echo "错误：找不到 $HY2_CONF，HY2 未安装？" >&2; exit 1; fi
+PASS="$(awk '/^[[:space:]]*password:/ {print $2; exit}' "$HY2_CONF" | tr -d '"'\''')"
+if [ -z "$PASS" ]; then echo "错误：从 $HY2_CONF 取不到密码" >&2; exit 1; fi
+
+echo "vless://${UUID}@[${IPV6}]:443?encryption=none&security=tls&sni=${SNI}&fp=chrome&type=grpc&serviceName=gun&mode=gun&allowInsecure=1#${NODE_NAME}-VLESS"
+echo "hysteria2://${PASS}@[${IPV6}]:443?sni=www.example.com&insecure=1#${NODE_NAME}-HY2"

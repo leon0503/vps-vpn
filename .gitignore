@@ -1,0 +1,13 @@
+# 生成的密钥与真实配置，绝不提交（模板文件不受影响，它们叫 *.template）
+*.key
+*.crt
+*.pem
+config.json
+config.yaml
+wgcf.conf
+wgcf-profile.conf
+wgcf-account.toml
+*.toml
+# 本地测试与临时文件
+*.log
+.DS_Store
