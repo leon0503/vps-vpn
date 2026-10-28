@@ -37,7 +37,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/leon0503/vps-vpn/main/instal
 改节点名前缀（例如新 VPS 在日本）：
 
 ```bash
-NODE_NAME=日本 bash <(curl -fsSL https://raw.githubusercontent.com/<你的用户名>/vps-vpn/main/install.sh)
+NODE_NAME=日本 bash <(curl -fsSL https://raw.githubusercontent.com/leon0503/vps-vpn/main/install.sh)
 ```
 
 或装完后改：
